@@ -1,0 +1,44 @@
+version: "3.0"
+
+services:
+  app:
+    build: .
+    image: hoinky-platform
+    command: gunicorn --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --reload Hoinky.wsgi
+    env_file:
+      - app.env
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgres://postgres:hoinky@postgres:5432/hoinkydb
+    expose:
+      - 8000
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:12.0
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=hoinkydb
+      - POSTGRES_PASSWORD=hoinky
+      
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+
+  nginx:
+    build: ./nginx
+    image: hoinky-nginx
+    volumes:
+      - ./static/:/app/static/
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+volumes:
+  postgres-data:
