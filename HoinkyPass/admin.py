@@ -24,7 +24,7 @@ class HoinkyUserAdmin(UserAdmin):
     search_fields = ('username', 'first_name', 'last_name', 'email')
 
     def get_quests(self, obj):
-        return ", ".join([quest.name for quest in obj.quests_achieved.all()])
+        return ", ".join([quest.title for quest in obj.quests_achieved.all()])
     get_quests.short_description = 'Quests Achieved'
 
 admin.site.register(HoinkyUser, HoinkyUserAdmin)

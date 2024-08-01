@@ -14,7 +14,7 @@ class Quest(models.Model):
         return self.title
 
 class HoinkyUser(AbstractUser):
-    quests_achieved = models.ManyToManyField(Quest, related_name='users', blank=True)
+    quests_achieved = models.ManyToManyField(Quest, blank=True)
     level = models.IntegerField(default=1)
     first_name = models.CharField(max_length=30, blank=False)
     last_name = models.CharField(max_length=150, blank=False)

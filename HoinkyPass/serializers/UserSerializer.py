@@ -12,11 +12,30 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         fields = ('username', 'email', 'password', 'first_name', 'last_name', 'level')
 
+class SimpleQuestSerializer(serializers.ModelSerializer):
+    is_finished = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Quest
+        fields = ['id', 'title', 'description', 'exp', 'is_finished']
+
+    def get_is_finished(self, obj):
+        user = self.context.get('user')
+        if user and user.quests_achieved.filter(id=obj.id).exists():
+            return True
+        return False
+
 class CustomUserSerializer(UserSerializer):
-    quest_achieved = QuestSerializer(many=True, read_only=True)
+    quests = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'level', 'quest_achieved', 'qr_unique', 'is_superuser')
+        model = HoinkyUser
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'level', 'qr_unique', 'is_superuser', 'quests')
+
+    def get_quests(self, obj):
+        quests = Quest.objects.all()
+        serializer = SimpleQuestSerializer(quests, many=True, context={'user': obj})
+        return serializer.data
 
 class CustomTokenCreateSerializer(TokenCreateSerializer):
     class Meta:

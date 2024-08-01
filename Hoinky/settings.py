@@ -67,17 +67,18 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
-        'APP': {
-            'client_id': '1039395471029741',
-            'secret': '36262a56cfec39a250a092c797830e2e',
-            'key': ''
-        }
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'name',
+        ],
     }
 }
 

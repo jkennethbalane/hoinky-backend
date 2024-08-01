@@ -2,7 +2,7 @@ from .models import Quest, HoinkyUser
 from django.shortcuts import get_object_or_404
 
 
-def get_quests(*args, **kwargs):
+def get_quests():
     return Quest.objects.all()
 
 def finished_quests(*args, **kwargs):
