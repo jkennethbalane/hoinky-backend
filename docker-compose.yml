@@ -4,12 +4,13 @@ services:
   app:
     build: .
     image: hoinky-platform
-    command: gunicorn --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --reload Hoinky.wsgi
+    command: daphne -u /tmp/daphne.sock --bind 0.0.0.0 --port 8000 Hoinky.asgi:application
     env_file:
       - app.env
     environment:
       - DEBUG=1
       - DATABASE_URL=postgres://postgres:hoinky@postgres:5432/hoinkydb
+      - DJANGO_SETTINGS_MODULE=Hoinky.settings
     expose:
       - 8000
     volumes:
@@ -39,6 +40,11 @@ services:
       - "80:80"
     depends_on:
       - app
+  
+  redis:
+    image: "redis:6.2"
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres-data:

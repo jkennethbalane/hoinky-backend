@@ -1,27 +1,49 @@
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from rest_framework import status, serializers
-# from rest_framework.permissions import AllowAny
-# from django.contrib.auth import authenticate
-# from djoser.views import TokenCreateView
-# from djoser.conf import settings
-# from djoser.serializers import TokenCreateSerializer
-# from rest_framework.authtoken.models import Token
-# from .serializers.TokenSerializer import CustomTokenCreateSerializer
+import time
+from django.http import StreamingHttpResponse, HttpResponse
+from django_eventstream import send_event
+from rest_framework.views import APIView
+from rest_framework.response import Response
+import logging
+from rest_framework.renderers import JSONRenderer
+from .sse_renderer import ServerSentEventRenderer
+from .serializers.UserSerializer import CustomUserSerializer
+import gevent
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
-# class CustomTokenCreateView(TokenCreateView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = CustomTokenCreateSerializer
+logger = logging.getLogger(__name__)
 
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.user
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response(
-#             {
-#                 'auth_token': token.key,
-#                 'is_superuser': user.is_superuser
-#             },
-#             status=status.HTTP_200_OK
-#         )
+class EventStreamView(APIView):
+    renderer_classes = [ServerSentEventRenderer]
+
+    def get(self, request, *args, **kwargs):
+        response = StreamingHttpResponse(content_type='text/event-stream')
+        response["X-Accel-Buffering"] = "no"  # Disable buffering in nginx
+        response["Cache-Control"] = "no-cache"  # Ensure clients don't cache the data
+        response['Transfer-Encoding'] = 'chunked'
+
+        def event_generator():
+            while True:
+                yield f"data: Hello, this is a test message!\n\n"
+                import time
+                time.sleep(1)
+
+        response.streaming_content = event_generator()
+        return response
+
+    def post(self, request, *args, **kwargs):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "events_group",
+            {
+                "type": "event_message",
+                "message": request.data.get('message', 'No message')
+            }
+        )
+        return Response(status=204)
+
+    def event_generator(self, test):
+        while True:
+            # Example event generation logic
+            yield f"{test}\n\n"
+            gevent.sleep(1)

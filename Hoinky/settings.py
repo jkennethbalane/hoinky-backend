@@ -39,7 +39,9 @@ SECRET_KEY = "django-insecure-#2^fpu*7@5llsg!mowl$9)$x=+b!fdpqfodfsga+he5!lnul!c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.0.2.2','localhost','0.0.0.0', '127.0.0.1']
+ALLOWED_HOSTS = ['10.0.2.2','localhost','0.0.0.0', '127.0.0.1', 'expert-coherent-frog.ngrok-free.app']
+
+CSRF_TRUSTED_ORIGINS = ['https://expert-coherent-frog.ngrok-free.app']
 
 
 # Application definition
@@ -51,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'HoinkyPass',
     'djoser',
+    'channels',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -58,11 +61,14 @@ INSTALLED_APPS = [
     'social_django',
     'oauth2_provider',
     'rest_framework_social_oauth2',
+    "django_eventstream",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
+
+ASGI_APPLICATION = 'Hoinky.asgi.application'
 
 SITE_ID = 1
 
@@ -82,6 +88,15 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -90,7 +105,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'allauth.account.middleware.AccountMiddleware'
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = "Hoinky.urls"

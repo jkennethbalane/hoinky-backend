@@ -26,4 +26,5 @@ RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Default command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-", "Hoinky.wsgi"]
+# CMD ["gunicorn", "--timeout", "120", "-k", "gevent", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-", "Hoinky.asgi"]
+CMD ["daphne", "-u", "/tmp/daphne.sock", "--bind", "0.0.0.0", "--port", "8000", "Hoinky.asgi:application"]
